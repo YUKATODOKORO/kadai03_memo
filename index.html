@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時間管理マトリクスタスクメモアプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>時間管理マトリクスタスクメモアプリ</h1>
+        <textarea id="task-input" placeholder="タスクを入力してください"></textarea>
+        <br>
+        <select id="quadrant-selector">
+            <option value="quadrant1">第1象限（必須）</option>
+            <option value="quadrant2">第2象限（効果性）</option>
+            <option value="quadrant3">第3象限（錯覚）</option>
+            <option value="quadrant4">第4象限（浪費・過剰）</option>
+        </select>
+        <br>
+        <button id="add-task">タスクを追加</button>
+        <button id="reset-data">データをリセット</button>
+        
+        <!-- 縦軸ラベル -->
+        <div class="vertical-label">重要度</div>
+
+        <!-- マトリクスの配置 -->
+        <div id="matrix">
+            <div id="quadrant1" class="quadrant">
+                <span class="quadrant-title">第1象限（必須）</span>
+            </div>
+            <div id="quadrant2" class="quadrant">
+                <span class="quadrant-title">第2象限（効果性）</span>
+            </div>
+            <div id="quadrant3" class="quadrant">
+                <span class="quadrant-title">第3象限（錯覚）</span>
+            </div>
+            <div id="quadrant4" class="quadrant">
+                <span class="quadrant-title">第4象限（浪費・過剰）</span>
+            </div>
+        </div>
+
+        <!-- 横軸ラベル -->
+        <div class="horizontal-label">緊急度</div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTaskData();
+
+            document.getElementById('add-task').addEventListener('click', function() {
+                let taskText = document.getElementById('task-input').value;
+                if (taskText !== '') {
+                    let selectedQuadrant = document.getElementById('quadrant-selector').value;
+                    addTask(taskText, selectedQuadrant);
+                    document.getElementById('task-input').value = '';
+                }
+            });
+
+            document.getElementById('reset-data').addEventListener('click', function() {
+                document.querySelectorAll('.quadrant').forEach(function(quadrant) {
+                    quadrant.innerHTML = '<span class="quadrant-title">' + quadrant.querySelector('.quadrant-title').textContent + '</span>';
+                });
+                localStorage.removeItem('taskData');
+            });
+
+            function addTask(text, quadrant) {
+                let taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.textContent = text;
+                
+                taskItem.addEventListener('dblclick', function() {
+                    let newText = prompt("タスクを編集:", text);
+                    if (newText) {
+                        this.textContent = newText;
+                        saveTaskData();
+                    }
+                });
+
+                document.getElementById(quadrant).appendChild(taskItem);
+                saveTaskData();
+            }
+
+            function saveTaskData() {
+                let taskData = {
+                    quadrant1: document.getElementById('quadrant1').innerHTML,
+                    quadrant2: document.getElementById('quadrant2').innerHTML,
+                    quadrant3: document.getElementById('quadrant3').innerHTML,
+                    quadrant4: document.getElementById('quadrant4').innerHTML
+                };
+                localStorage.setItem('taskData', JSON.stringify(taskData));
+            }
+
+            function loadTaskData() {
+                let storedData = JSON.parse(localStorage.getItem('taskData'));
+                if (storedData) {
+                    document.getElementById('quadrant1').innerHTML = storedData.quadrant1;
+                    document.getElementById('quadrant2').innerHTML = storedData.quadrant2;
+                    document.getElementById('quadrant3').innerHTML = storedData.quadrant3;
+                    document.getElementById('quadrant4').innerHTML = storedData.quadrant4;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
